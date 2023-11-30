@@ -4,7 +4,7 @@
 #include<unistd.h>
 #include<sys/socket.h>
 #include<arpa/inet.h>
-#include<netinet.h>
+#include<netinet/in.h>
 #include<errno.h>
 
 #define PORT 8888
@@ -14,19 +14,20 @@
 int createTcpIp4Socket();
 struct sockaddr_in* setAddress(char* ip, int port);
 
-int main()
+int main(int argc, char const *argv[]) 
+  
 {
     int server_socket;
-    if(server_socket = createTcpIp4Socket() == -1)
+    if((server_socket = createTcpIp4Socket()) == -1)
     {
         perror("Error occured while creating the socket!\nTry again later!\n");
         exit(EXIT_FAILURE);
     }
     int opt = 1;
-    setsockopt(mastersockfd, SOL_SOCKET, SO_REUSEADDR, (void *) &opt, sizeof(opt));
+    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, (void *) &opt, sizeof(opt));
 
     struct sockaddr_in* server_address = setAddress("", PORT);
-    if(bind(server_socket, server_address, sizeof(*server_address)) == -1)
+    if(bind(server_socket, (struct sockaddr*)server_address, sizeof(*server_address)) == -1)
     {
         perror("Error occured while binding the port!\nTry again later!\n");
         exit(EXIT_FAILURE);
@@ -34,7 +35,7 @@ int main()
     listen(server_socket, BACKLOG);
     struct sockaddr_in client_address;
     socklen_t client_address_len;
-    int client_socket = accept(server_address, &client_address, &client_address_len);
+    int client_socket = accept(server_socket, (struct sockaddr*)&client_address, &client_address_len);
     char recv_buffer[BUFFER], send_buffer[BUFFER];
     printf("Client connected\n");
     do
@@ -60,7 +61,7 @@ int createTcpIp4Socket()
     
 }
 
-struct sockaddr_in setAddress(char *ip, int port)
+struct sockaddr_in* setAddress(char *ip, int port)
 {
     struct sockaddr_in *address = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
     address->sin_family = AF_INET;
