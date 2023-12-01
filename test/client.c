@@ -1,4 +1,4 @@
-#include "../utility/helper.h"
+#include "utility/helper.h"
 
 int main()
 {
@@ -15,7 +15,7 @@ int main()
     
     printf("Enter the server ip: ");
     getline(&server_ip, &ip_len, stdin);
-    
+     
 
 
     struct sockaddr_in* address = setAddress(server_ip, PORT);
