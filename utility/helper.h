@@ -11,7 +11,7 @@
 #include<errno.h>
 
 #define PORT 8888
-#define BUFFER 100
+#define BUFFER 1024
 #define BACKLOG 10
 
 int createTcpIp4Socket();

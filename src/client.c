@@ -1,5 +1,6 @@
 #include "../utility/helper.h"
-
+//client need to send username after connecting
+//It recieves msg with username at first
 int main()
 {
     int client_socket;
@@ -27,7 +28,13 @@ int main()
         free(server_ip);
         exit(EXIT_FAILURE);
     }
-    do
+    printf("Enter username:");
+    fgets(send_buffer, BUFFER, stdin);
+    send_buffer[strcspn(send_buffer, "\n")] = '\0';
+    send(client_socket,send_buffer, BUFFER,0);
+
+
+    /*do
     {
         printf("Enter a msg: ");
         fgets(send_buffer, BUFFER, stdin);
@@ -36,10 +43,37 @@ int main()
 
         recv(client_socket, recv_buffer, BUFFER, 0);
         printf("%s\n", recv_buffer);
-    }while(strcmp(send_buffer,"exit") != 0);
+    }while(strcmp(send_buffer,"exit") != 0);*/
+    fd_set read_fds;
+    int ready_select, max_fd = client_socket;
+    if((ready_select < 0) && (errno!=EINTR))
+    {
+        perror("Error occoured during checking for ready fds to read!\n");
+        exit(EXIT_FAILURE);
+    }
+    do
+    {
+        FD_ZERO(&read_fds);
+        FD_SET(0, &read_fds);
+        FD_SET(client_socket, &read_fds);
+        ready_select = select(max_fd+1, &read_fds, NULL, NULL, NULL);
+        if(FD_ISSET(0, &read_fds))
+        {
+            fgets(send_buffer, BUFFER, stdin);
+            send_buffer[strcspn(send_buffer, "\n")] = '\0';
+            send(client_socket,send_buffer, BUFFER,0);
+        }
+        if(FD_ISSET(client_socket, &read_fds))
+        {
+            recv(client_socket, recv_buffer, BUFFER, 0);
+            printf("%s\n", recv_buffer);
+        }
+    }while(strcmp(send_buffer, "exit") != 0);
+
 
     free(address);
     free(server_ip);
+    close(client_socket);
 
     return 0;
 
