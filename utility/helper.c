@@ -1,5 +1,6 @@
 #include "helper.h"
 
+// Create socket for TCP connection with IPv4
 int createTcpIp4Socket()
 {
     
@@ -7,6 +8,7 @@ int createTcpIp4Socket()
     
 }
 
+// Set address in sockaddr_in structure
 struct sockaddr_in* setAddress(char *ip, int port)
 {
     struct sockaddr_in *address = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
@@ -28,3 +30,4 @@ struct sockaddr_in* setAddress(char *ip, int port)
     return address;
     
 }
+

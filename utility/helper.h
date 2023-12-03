@@ -13,11 +13,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define PORT 8888
-#define BUFFER 1024
-
-#define BACKLOG 10
-#define TERMINAL_EMULATOR "gnome-terminal"
+#define PORT 8888               // Port of server
+#define BUFFER 1024             // Buffer for every input and output
+#define BACKLOG 10              // Backlog of the server
+#define TERMINAL_EMULATOR "gnome-terminal"    // Command to open terminal "gnome-terminal" in ubuntu
 
 
 int createTcpIp4Socket();
