@@ -41,6 +41,34 @@ int main(int argc, char const *argv[])
   
 {
     int server_socket;
+    int fifo_fd;
+    char fifo_file[BUFFER];
+    printf("Give a unique name for your TypeSpace:");
+    fgets(fifo_file, sizeof(fifo_file)-1, stdin);
+    fifo_file[strcspn(fifo_file, "\n")] = '\0';
+    if (access(fifo_file, F_OK) == -1) 
+    {
+        if(mkfifo(fifo_file, S_IRUSR | S_IWUSR) != 0)
+        {
+            perror("Error creating named TypeSpace");
+            exit(EXIT_FAILURE);
+        }
+        printf("Fifo file\n");
+    }
+    pid_t process_id = fork();
+    if(process_id<0)
+    {
+        perror("Error occured during fork()!\n");
+        exit(EXIT_FAILURE);
+    }
+    else if(process_id == 0)
+    {
+        printf("New process\n");
+        system(TERMINAL_EMULATOR " -- ./type_space");
+    }
+    else
+    {
+    fifo_fd = open(fifo_file, O_RDONLY);
     if((server_socket = createTcpIp4Socket()) == -1)
     {
         perror("Error occured while creating the socket!\nTry again later!\n");
@@ -78,7 +106,9 @@ int main(int argc, char const *argv[])
     {
         FD_ZERO(&read_fds);
         FD_SET(server_socket, &read_fds);
-        max_fd = server_socket;
+        FD_SET(fifo_fd, &read_fds);
+        if(server_socket>fifo_fd) max_fd = server_socket;
+        else max_fd = fifo_fd;
         temp = head_node->next;
         //printf("while adding\n");
         while(temp != head_node)
@@ -98,7 +128,14 @@ int main(int argc, char const *argv[])
             perror("Error occoured during checking for ready fds to read!\n");
             exit(EXIT_FAILURE);
         }
-
+        if(FD_ISSET(fifo_fd, &read_fds))
+        {
+            read(fifo_fd, send_buffer, BUFFER);
+            
+            if(strcmp(send_buffer, "exit") == 0) break;
+            else send_to_all(head_node, head_node, send_buffer);
+            
+        }
         temp = head_node;
         do
         {
@@ -140,8 +177,10 @@ int main(int argc, char const *argv[])
     clean_up(head_node);
 
     free(server_address);
+    close(fifo_fd);
     //close(client_socket);
     //close(server_socket);
+    }
     return 0;
     
 }

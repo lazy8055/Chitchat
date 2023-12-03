@@ -79,12 +79,13 @@ sockfd_node* remove_client_by_name(sockfd_node* server_node, char *user_name)
 sockfd_node* remove_all_nodes(sockfd_node* server_node)
 {
     sockfd_node *pre=NULL, *temp=server_node->next;
-    char remove_msg[] = "Kicked Out By Admin!";
+    char remove_msg[] = "ChatRoom is closed!";
     while(temp!=server_node)
     {
         pre = temp;
         temp = temp->next;
-        send(temp->socket_val, remove_msg, sizeof(remove_msg), 0);
+        //printf("%s\n", pre->user_name);
+        send(pre->socket_val, remove_msg, sizeof(remove_msg), 0);
         close(pre->socket_val);
         free(pre);
     }
@@ -94,6 +95,7 @@ sockfd_node* remove_all_nodes(sockfd_node* server_node)
 
 void clean_up(sockfd_node* server_node)
 {
+    //printf("Cleaning started!\n");
     remove_all_nodes(server_node);
     close(server_node->socket_val);
     free(server_node);

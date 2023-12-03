@@ -4,18 +4,83 @@
 int main()
 {
     int client_socket;
-    char *server_ip = NULL;
-    size_t ip_len = 0;
+    int server_status;
+    char server_ip[BUFFER];
+    //size_t ip_len = 0;
     char send_buffer[BUFFER], recv_buffer[BUFFER];
-
+    char fifo_file[BUFFER];
+    int fifo_fd;
+    printf("Give a unique name for your TypeSpace:");
+    fgets(fifo_file, sizeof(fifo_file)-1, stdin);
+    fifo_file[strcspn(fifo_file, "\n")] = '\0';
+    if (access(fifo_file, F_OK) == -1) 
+    {
+        if(mkfifo(fifo_file, S_IRUSR | S_IWUSR) != 0)
+        {
+            perror("Error creating named TypeSpace");
+            exit(EXIT_FAILURE);
+        }
+        //printf("Fifo file\n");
+    }
+    
+    pid_t process_id = fork();
+    //printf("Fork\n");
+    if(process_id < 0)
+    {
+        perror("Error happened during fork()!\n");
+        exit(EXIT_FAILURE);
+    }
+    else if(process_id == 0)
+    {
+        printf("New process\n");
+        system(TERMINAL_EMULATOR " -- ./type_space");
+    }
+    else
+    {
+    //printf("%d\n",process_id);
+    //fifo_fd = open(fifo_file, O_RDONLY );
+    fifo_fd = open(fifo_file, O_RDONLY);
+    printf("Connected to the TypeSpace!\n");
+    fd_set read_fds;
+    int ready_select,max_fd;
+    max_fd = fifo_fd;
+    fflush(stdout);
+    //printf("dsfsdg");
+    //fflush(stdout);
+    
+    //read(fifo_fd, server_ip, BUFFER);
+    
+    
+    
     if((client_socket = createTcpIp4Socket()) == -1)
     {
         perror("Error occured while creating the socket!\nTry again later!\n");
         exit(EXIT_FAILURE);
     }
-    
+    fflush(stdout);
     printf("Enter the server ip: ");
-    getline(&server_ip, &ip_len, stdin);
+    fflush(stdout);
+    read(fifo_fd, server_ip, BUFFER);
+    printf("%s\n", server_ip);
+    fflush(stdout);
+    /*while(1)
+    {
+        FD_ZERO(&read_fds);
+        FD_SET(fifo_fd, &read_fds);
+        //FD_SET(client_socket, &read_fds);
+        ready_select = select(max_fd+1, &read_fds, NULL, NULL, NULL);
+        if((ready_select < 0) && (errno!=EINTR))
+        {
+            perror("Error occoured during checking for ready fds to read!\n");
+            exit(EXIT_FAILURE);
+        }
+        if(FD_ISSET(fifo_fd, &read_fds))
+        {
+            read(fifo_fd, server_ip, BUFFER);
+            
+            break;
+        }
+    }*/
     
 
 
@@ -25,56 +90,80 @@ int main()
     {
         perror("Can't able to connect to the server!\nTry Again!\n");
         free(address);
-        free(server_ip);
+        
         exit(EXIT_FAILURE);
     }
-    printf("Enter username:");
-    fgets(send_buffer, BUFFER, stdin);
-    send_buffer[strcspn(send_buffer, "\n")] = '\0';
+    //printf("Enter username:");
+    //read(fifo_fd, send_buffer, BUFFER);
+    
+    //send(client_socket,send_buffer, BUFFER,0);
+    
+    printf("Enter the username: ");
+    fflush(stdout);
+    read(fifo_fd, send_buffer, BUFFER);
     send(client_socket,send_buffer, BUFFER,0);
-
-
-    /*do
+    printf("%s\n",send_buffer);
+    fflush(stdout);
+    /*while(1)
     {
-        printf("Enter a msg: ");
-        fgets(send_buffer, BUFFER, stdin);
-        send_buffer[strcspn(send_buffer, "\n")] = '\0';
-        send(client_socket,send_buffer, BUFFER,0);
-
-        recv(client_socket, recv_buffer, BUFFER, 0);
-        printf("%s\n", recv_buffer);
-    }while(strcmp(send_buffer,"exit") != 0);*/
-    fd_set read_fds;
-    int ready_select, max_fd = client_socket;
-    if((ready_select < 0) && (errno!=EINTR))
-    {
-        perror("Error occoured during checking for ready fds to read!\n");
-        exit(EXIT_FAILURE);
-    }
+        FD_ZERO(&read_fds);
+        FD_SET(fifo_fd, &read_fds);
+        //FD_SET(client_socket, &read_fds);
+        ready_select = select(max_fd+1, &read_fds, NULL, NULL, NULL);
+        if((ready_select < 0) && (errno!=EINTR))
+        {
+            perror("Error occoured during checking for ready fds to read!\n");
+            exit(EXIT_FAILURE);
+        }
+        if(FD_ISSET(fifo_fd, &read_fds))
+        {
+            read(fifo_fd, send_buffer, BUFFER);
+            send(client_socket,send_buffer, BUFFER,0);
+            break;
+        }
+    }*/
+    if(client_socket > fifo_fd) max_fd = client_socket;
+    else max_fd = fifo_fd;
     do
     {
         FD_ZERO(&read_fds);
-        FD_SET(0, &read_fds);
+        FD_SET(fifo_fd, &read_fds);
         FD_SET(client_socket, &read_fds);
         ready_select = select(max_fd+1, &read_fds, NULL, NULL, NULL);
-        if(FD_ISSET(0, &read_fds))
+        if((ready_select < 0) && (errno!=EINTR))
         {
-            fgets(send_buffer, BUFFER, stdin);
-            send_buffer[strcspn(send_buffer, "\n")] = '\0';
+            perror("Error occoured during checking for ready fds to read!\n");
+            exit(EXIT_FAILURE);
+        }
+        if(FD_ISSET(fifo_fd, &read_fds))
+        {
+            read(fifo_fd, send_buffer, BUFFER);
             send(client_socket,send_buffer, BUFFER,0);
+            fflush(stdout);
+            printf("You : %s\n",send_buffer);
+            fflush(stdout);
         }
         if(FD_ISSET(client_socket, &read_fds))
         {
+            /*server_status = recv(client_socket, NULL, 0, MSG_PEEK);
+            if(server_status == 0) 
+            {
+                break;
+            }*/
             recv(client_socket, recv_buffer, BUFFER, 0);
+            fflush(stdout);
             printf("%s\n", recv_buffer);
+            fflush(stdout);
+            
+            
         }
-    }while(strcmp(send_buffer, "exit") != 0);
+    }while(strcmp(send_buffer, "exit") != 0 && strcmp(recv_buffer,"ChatRoom is closed!") != 0);
 
-
+    close(fifo_fd);
     free(address);
-    free(server_ip);
+    //free(server_ip);
     close(client_socket);
-
+    }
     return 0;
 
 }
