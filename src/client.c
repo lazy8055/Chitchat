@@ -10,6 +10,8 @@ int main()
     fd_set read_fds;
     struct sockaddr_in* address = NULL;
     
+    display_banner();
+
     // ### Create a new terminal for typing messages ###
     printf("Give a unique name for your TypeSpace:");
     fgets(fifo_file, sizeof(fifo_file), stdin);
@@ -39,7 +41,9 @@ int main()
     {
         // Execute the type_space program in another terminal
         strcpy(command, TERMINAL_EMULATOR );
-        strcat(command, " -- ./type_space ");
+        strcat(command, " ");
+        strcat(command, FLAG_TO_EXECUTE);
+        strcat(command, " ./type_space client ");
         strcat(command, fifo_file);
         system(command);
     }

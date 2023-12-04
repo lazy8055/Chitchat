@@ -1,11 +1,11 @@
 #include "../utility/server_helper.h"
-#include <regex.h>
+
 
 
 int main() 
   
 {
-    int server_socket, fifo_fd, max_fd, ready_select, active_connections = 1, addr_reuse_opt = 1;
+    int server_socket, fifo_fd, max_fd, ready_select, addr_reuse_opt = 1;
     char recv_buffer[BUFFER], send_buffer[BUFFER], fifo_file[BUFFER];
     char command[COMMAND_LEN];
     struct sockaddr_in* server_address = NULL;
@@ -14,6 +14,8 @@ int main()
     fd_set read_fds;
     regex_t regex;
     const char *pattern = "^remove [[:alnum:]_]+$";
+
+    display_banner();
 
     // Compile the regex pattern
     if (regcomp(&regex, pattern, REG_EXTENDED) != 0) {
@@ -51,7 +53,9 @@ int main()
         // ### Clild Process ###
         // Execute the type_space program in another terminal 
         strcpy(command, TERMINAL_EMULATOR );
-        strcat(command, " -- ./type_space ");
+        strcat(command, " ");
+        strcat(command, FLAG_TO_EXECUTE);
+        strcat(command, " ./type_space server ");
         strcat(command, fifo_file);
         system(command);
     }

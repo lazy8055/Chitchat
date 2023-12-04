@@ -44,6 +44,7 @@ void send_to_all(sockfd_node *server_node, sockfd_node *sender, char message[])
     strcat(send_buffer, ": ");
     strcat(send_buffer, message);
     printf("%s\n", send_buffer);
+    
 
     do
     {
@@ -72,6 +73,7 @@ void accept_client(sockfd_node *server_node)
 
     strcpy(send_buffer,user_name);
     strcat(send_buffer, intro_massage);
+    
 
     // Send intro message to every clients
     send_to_all(server_node, server_node, send_buffer);
@@ -115,16 +117,19 @@ sockfd_node* remove_client_by_name(sockfd_node* server_node, char *user_name)
         return server_node;
     }
     char send_buffer[BUFFER];
-    char remove_msg[] = "Kicked Out By Admin!";
+    char remove_msg[BUFFER] = "Kicked Out By Admin!";
     sockfd_node *temp = server_node->next;
     
     while(temp != server_node)
     {
         if(strcmp(temp->user_name, user_name)==0)
         {
+            
             strcpy(send_buffer, temp->user_name);
             strcat(send_buffer, " ");
             strcat(send_buffer, remove_msg);
+            
+            
 
             (temp->pre)->next = temp->next;
             temp->next->pre = temp->pre;
@@ -144,7 +149,9 @@ sockfd_node* remove_client_by_name(sockfd_node* server_node, char *user_name)
 sockfd_node* remove_all_nodes(sockfd_node* server_node)
 {
     char remove_msg[] = "ChatRoom is closed!";
+    
     sockfd_node *pre=NULL, *temp=server_node->next;
+    
     
     while(temp!=server_node)
     {

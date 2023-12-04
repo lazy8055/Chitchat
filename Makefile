@@ -18,10 +18,10 @@ client: $(OBJ_DIR)/client.o $(OBJ_DIR)/helper.o
 	$(CC) $^ -o $@
 
 $(OBJ_DIR)/server.o: src/server.c utility/helper.h utility/server_helper.h | $(OBJ_DIR)
-	$(CC) -D_GNU_SOURCE -c $< -o $@
+	$(CC) -c $< -o $@
 
 server: $(OBJ_DIR)/server.o $(OBJ_DIR)/helper.o $(OBJ_DIR)/server_helper.o
-	$(CC) $^ -o $@
+	$(CC) -D_GNU_SOURCE $^ -o $@
 
 type_space: src/type_space.c utility/helper.h | $(OBJ_DIR)
 	$(CC) $< $(CFLAGS) -o $@
