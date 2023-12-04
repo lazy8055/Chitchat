@@ -1,14 +1,11 @@
 #include "../utility/helper.h"
 
 
-int main()
+int main(int argc, char const *argv[])
 {
     int fifo_fd;
-    char fifo_file[BUFFER], send_buffer[BUFFER];
-
-    printf("Enter the name of your TypeSpace:");
-    fgets(fifo_file, sizeof(fifo_file)-1, stdin);
-    fifo_file[strcspn(fifo_file, "\n")] = '\0';
+    char send_buffer[BUFFER], fifo_file[BUFFER] ;
+    strcpy(fifo_file, argv[1]);
 
     // Open fifo file created by server/client program to write only
     fifo_fd = open(fifo_file, O_WRONLY );
@@ -29,8 +26,9 @@ int main()
         write(fifo_fd, send_buffer, BUFFER);
     }
 
-    //close the fifo file descriptor
+    //close the fifo file descriptor and delete the file
     close(fifo_fd);
+    remove(fifo_file);
     
     return 0;
 }

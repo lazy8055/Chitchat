@@ -1,16 +1,25 @@
 #include "../utility/server_helper.h"
+#include <regex.h>
 
 
-
-int main(int argc, char const *argv[]) 
+int main() 
   
 {
     int server_socket, fifo_fd, max_fd, ready_select, active_connections = 1, addr_reuse_opt = 1;
     char recv_buffer[BUFFER], send_buffer[BUFFER], fifo_file[BUFFER];
+    char command[COMMAND_LEN];
     struct sockaddr_in* server_address = NULL;
     sockfd_node *head_node = NULL, *temp=NULL;
     pid_t process_id;
     fd_set read_fds;
+    regex_t regex;
+    const char *pattern = "^remove [[:alnum:]_]+$";
+
+    // Compile the regex pattern
+    if (regcomp(&regex, pattern, REG_EXTENDED) != 0) {
+        perror("Failed to compile regular expression\n");
+        exit(EXIT_FAILURE);
+    }
 
     // ### Create a new terminal for typing messages ###
     printf("Give a unique name for your TypeSpace:");
@@ -26,7 +35,6 @@ int main(int argc, char const *argv[])
             perror("Error creating named TypeSpace");
             exit(EXIT_FAILURE);
         }
-        printf("Fifo file\n");
     }
 
     // ### Create a child process with process_id 0 to open a terminal without blocking the program ###
@@ -42,7 +50,10 @@ int main(int argc, char const *argv[])
     {
         // ### Clild Process ###
         // Execute the type_space program in another terminal 
-        system(TERMINAL_EMULATOR " -- ./type_space");
+        strcpy(command, TERMINAL_EMULATOR );
+        strcat(command, " -- ./type_space ");
+        strcat(command, fifo_file);
+        system(command);
     }
     else
     {
@@ -120,6 +131,14 @@ int main(int argc, char const *argv[])
                 read(fifo_fd, send_buffer, BUFFER);
             
                 if(strcmp(send_buffer, "exit") == 0) break;
+                else if(strcmp(send_buffer, "remove all") == 0)
+                {
+                    remove_all_nodes(head_node);
+                }
+                else if(regexec(&regex, send_buffer, 0, NULL, 0) == 0)
+                {
+                    remove_client_by_name(head_node, strchr(send_buffer,' ')+1);
+                }
                 else send_to_all(head_node, head_node, send_buffer);
             
             }

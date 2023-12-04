@@ -9,14 +9,16 @@
 #include<unistd.h>
 #include<sys/socket.h>
 #include<errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<stdbool.h>
 
 #define PORT 8888               // Port of server
 #define BUFFER 1024             // Buffer for every input and output
 #define BACKLOG 10              // Backlog of the server
 #define TERMINAL_EMULATOR "gnome-terminal"    // Command to open terminal "gnome-terminal" in ubuntu
+#define COMMAND_LEN 100
 
 
 int createTcpIp4Socket();

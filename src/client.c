@@ -4,6 +4,8 @@ int main()
 {
     int client_socket, fifo_fd, ready_select, max_fd;
     char send_buffer[BUFFER], recv_buffer[BUFFER], server_ip[BUFFER], fifo_file[BUFFER];
+    char command[COMMAND_LEN];
+    bool exit_condition = false;
     pid_t process_id;
     fd_set read_fds;
     struct sockaddr_in* address = NULL;
@@ -36,7 +38,10 @@ int main()
     else if(process_id == 0)
     {
         // Execute the type_space program in another terminal
-        system(TERMINAL_EMULATOR " -- ./type_space");
+        strcpy(command, TERMINAL_EMULATOR );
+        strcat(command, " -- ./type_space ");
+        strcat(command, fifo_file);
+        system(command);
     }
 
     else
@@ -124,8 +129,9 @@ int main()
                 printf("%s\n", recv_buffer);
                 fflush(stdout);
             }
+            exit_condition = strcmp(send_buffer, "exit") != 0 && strcmp(recv_buffer,"ChatRoom is closed!") != 0 && strcmp(recv_buffer, "Kicked Out By Admin!") != 0;
 
-        }while(strcmp(send_buffer, "exit") != 0 && strcmp(recv_buffer,"ChatRoom is closed!") != 0);
+        }while(exit_condition);
 
         // Close the opened file descriptors and free dynamically allocated memory
         close(fifo_fd);

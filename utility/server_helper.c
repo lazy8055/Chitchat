@@ -1,5 +1,7 @@
 #include "server_helper.h"
 
+
+
 // ### Implementation of circular doubly linked list ###
 
 // Initialize the linked list and set server as head_node
@@ -85,7 +87,7 @@ sockfd_node* remove_client_by_soc(sockfd_node* server_node, int socket_val)
         return server_node;
     }
 
-    char remove_msg[] = "Kicked Out By Admin!";
+    //char remove_msg[] = "Kicked Out By Admin!";
     sockfd_node *temp = server_node->next;
     
     while(temp != server_node)
@@ -94,7 +96,7 @@ sockfd_node* remove_client_by_soc(sockfd_node* server_node, int socket_val)
         {
             (temp->pre)->next = temp->next;
             temp->next->pre = temp->pre;
-            send(temp->socket_val, remove_msg, sizeof(remove_msg), 0);
+            //send(temp->socket_val, remove_msg, sizeof(remove_msg), 0);
             close(temp->socket_val);
             free(temp);
             break;
@@ -112,7 +114,7 @@ sockfd_node* remove_client_by_name(sockfd_node* server_node, char *user_name)
         perror("Admin can't be removed!\n");
         return server_node;
     }
-    
+    char send_buffer[BUFFER];
     char remove_msg[] = "Kicked Out By Admin!";
     sockfd_node *temp = server_node->next;
     
@@ -120,11 +122,18 @@ sockfd_node* remove_client_by_name(sockfd_node* server_node, char *user_name)
     {
         if(strcmp(temp->user_name, user_name)==0)
         {
+            strcpy(send_buffer, temp->user_name);
+            strcat(send_buffer, " ");
+            strcat(send_buffer, remove_msg);
+
             (temp->pre)->next = temp->next;
             temp->next->pre = temp->pre;
             send(temp->socket_val, remove_msg, sizeof(remove_msg), 0);
             close(temp->socket_val);
             free(temp);
+
+            send_to_all(server_node, server_node, send_buffer);
+
             break;
         }
         temp = temp->next;
