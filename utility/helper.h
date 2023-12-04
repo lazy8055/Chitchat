@@ -38,5 +38,6 @@
 int createTcpIp4Socket();
 struct sockaddr_in* setAddress(char *ip, int port);
 void display_banner();
+void Perror(char error_message[]);
 
 #endif

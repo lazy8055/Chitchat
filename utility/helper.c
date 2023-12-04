@@ -43,6 +43,12 @@ void display_banner()
     printf("\n\n");
 }
 
+void Perror(char error_message[])
+{
+    printf("%s%s",ANSI_BOLD, ANSI_RED);
+    perror(error_message);
+    printf("%s",ANSI_RESET);
+}
 
 // Create socket for TCP connection with IPv4
 int createTcpIp4Socket()
@@ -66,7 +72,7 @@ struct sockaddr_in* setAddress(char *ip, int port)
     {
         if(inet_pton(AF_INET, ip, &address->sin_addr.s_addr) < 0)
         {
-            perror("Error occured during convertion of ip to binary\n");
+            Perror("Error occured during convertion of ip to binary\n");
             free(address);
             exit(EXIT_FAILURE);
         }

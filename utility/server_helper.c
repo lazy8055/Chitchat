@@ -39,8 +39,9 @@ void send_to_all(sockfd_node *server_node, sockfd_node *sender, char message[])
 {
     char send_buffer[BUFFER];
     sockfd_node *temp = server_node->next;
-
-    strcpy(send_buffer, sender->user_name);
+    strcpy(send_buffer, ANSI_BOLD ANSI_BLUE);
+    strcat(send_buffer, sender->user_name);
+    strcat(send_buffer, ANSI_RESET);
     strcat(send_buffer, ": ");
     strcat(send_buffer, message);
     printf("%s\n", send_buffer);
@@ -71,8 +72,10 @@ void accept_client(sockfd_node *server_node)
 
     server_node = insert_client(server_node, client_socket,user_name, client_address);
 
-    strcpy(send_buffer,user_name);
+    strcpy(send_buffer, ANSI_BOLD ANSI_CYAN);
+    strcat(send_buffer,user_name);
     strcat(send_buffer, intro_massage);
+    strcat(send_buffer, ANSI_RESET);
     
 
     // Send intro message to every clients
@@ -85,7 +88,7 @@ sockfd_node* remove_client_by_soc(sockfd_node* server_node, int socket_val)
 {
     if(socket_val == server_node->socket_val)
     {
-        perror("Admin can't be removed!\n");
+        Perror("Admin can't be removed!\n");
         return server_node;
     }
 
@@ -113,19 +116,19 @@ sockfd_node* remove_client_by_name(sockfd_node* server_node, char *user_name)
 {
     if(strcmp("Admin(*)", user_name)==0)
     {
-        perror("Admin can't be removed!\n");
+        Perror("Admin can't be removed!\n");
         return server_node;
     }
     char send_buffer[BUFFER];
-    char remove_msg[BUFFER] = "Kicked Out By Admin!";
+    char remove_msg[BUFFER] = ANSI_BOLD ANSI_RED "Kicked Out By Admin!" ANSI_RESET;
     sockfd_node *temp = server_node->next;
     
     while(temp != server_node)
     {
         if(strcmp(temp->user_name, user_name)==0)
         {
-            
-            strcpy(send_buffer, temp->user_name);
+            strcpy(send_buffer, ANSI_BOLD ANSI_RED);
+            strcat(send_buffer, temp->user_name);
             strcat(send_buffer, " ");
             strcat(send_buffer, remove_msg);
             
@@ -148,7 +151,7 @@ sockfd_node* remove_client_by_name(sockfd_node* server_node, char *user_name)
 // Remove all client nodes
 sockfd_node* remove_all_nodes(sockfd_node* server_node)
 {
-    char remove_msg[] = "ChatRoom is closed!";
+    char remove_msg[] = ANSI_BOLD ANSI_RED "ChatRoom is closed!" ANSI_RESET;
     
     sockfd_node *pre=NULL, *temp=server_node->next;
     

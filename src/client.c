@@ -23,7 +23,7 @@ int main()
         //If not make a new file giving read and write permissions to the user
         if(mkfifo(fifo_file, S_IRUSR | S_IWUSR) != 0)
         {
-            perror("Error creating named TypeSpace");
+            Perror("Error creating named TypeSpace");
             exit(EXIT_FAILURE);
         }
     }
@@ -33,7 +33,7 @@ int main()
     
     if(process_id < 0)
     {
-        perror("Error happened during fork()!\n");
+        Perror("Error happened during fork()!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -53,7 +53,7 @@ int main()
         // Open the fifo file
         if ((fifo_fd = open(fifo_file, O_RDONLY)) == -1) 
         {
-            perror("Error occured during accessing TypeSpace.\nTerminate the TypeSpace program and run it again!\n");
+            Perror("Error occured during accessing TypeSpace.\nTerminate the TypeSpace program and run it again!\n");
             exit(EXIT_FAILURE);
         }
         printf("Connected to the TypeSpace!\n");
@@ -63,14 +63,14 @@ int main()
         // Create a socket to connect to the server
         if((client_socket = createTcpIp4Socket()) == -1)
         {
-            perror("Error occured while creating the socket!\nTry again later!\n");
+            Perror("Error occured while creating the socket!\nTry again later!\n");
             exit(EXIT_FAILURE);
         }
         
         printf("Enter the server ip: ");
         fflush(stdout);
         read(fifo_fd, server_ip, BUFFER);
-        printf("%s\n", server_ip);
+        printf("%s%s%s%s\n",ANSI_BOLD ,ANSI_GREEN, server_ip, ANSI_RESET);
         fflush(stdout);
     
         // Set server address
@@ -79,7 +79,7 @@ int main()
         // Connect to the server
         if(connect(client_socket, (struct sockaddr*)address, sizeof(*address)) == -1)
         {
-            perror("Can't able to connect to the server!\nTry Again!\n");
+            Perror("Can't able to connect to the server!\nTry Again!\n");
             free(address);
 
             exit(EXIT_FAILURE);
@@ -90,7 +90,7 @@ int main()
         fflush(stdout);
         read(fifo_fd, send_buffer, BUFFER);
         send(client_socket,send_buffer, BUFFER,0);
-        printf("%s\n",send_buffer);
+        printf("%s%s%s%s\n\n",ANSI_BOLD ,ANSI_GREEN, send_buffer, ANSI_RESET);
         fflush(stdout);
     
         if(client_socket > fifo_fd) max_fd = client_socket;
@@ -111,7 +111,7 @@ int main()
 
             if((ready_select < 0) && (errno!=EINTR))
             {
-                perror("Error occoured during checking for ready fds to read!\n");
+                Perror("Error occoured during checking for ready fds to read!\n");
                 exit(EXIT_FAILURE);
             }
 
@@ -121,7 +121,7 @@ int main()
                 read(fifo_fd, send_buffer, BUFFER);
                 send(client_socket,send_buffer, BUFFER,0);
                 //fflush(stdout);
-                printf("You : %s\n",send_buffer);
+                printf("%s%sYou %s: %s\n",ANSI_BOLD, ANSI_GREEN, ANSI_RESET, send_buffer);
                 fflush(stdout);
             }
 
@@ -133,7 +133,9 @@ int main()
                 printf("%s\n", recv_buffer);
                 fflush(stdout);
             }
-            exit_condition = strcmp(send_buffer, "exit") != 0 && strcmp(recv_buffer,"ChatRoom is closed!") != 0 && strcmp(recv_buffer, "Kicked Out By Admin!") != 0;
+            sleep(1);
+            exit_condition = (strcmp(send_buffer, "exit") != 0 && strcmp(recv_buffer,ANSI_BOLD ANSI_RED "ChatRoom is closed!" ANSI_RESET) != 0 
+            && strcmp(recv_buffer, ANSI_BOLD ANSI_RED "Kicked Out By Admin!"  ANSI_RESET) != 0);
 
         }while(exit_condition);
 

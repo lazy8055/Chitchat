@@ -19,7 +19,7 @@ int main()
 
     // Compile the regex pattern
     if (regcomp(&regex, pattern, REG_EXTENDED) != 0) {
-        perror("Failed to compile regular expression\n");
+        Perror("Failed to compile regular expression\n");
         exit(EXIT_FAILURE);
     }
 
@@ -34,7 +34,7 @@ int main()
         //If not make a new file giving read and write permissions to the user
         if(mkfifo(fifo_file, S_IRUSR | S_IWUSR) != 0)
         {
-            perror("Error creating named TypeSpace");
+            Perror("Error creating named TypeSpace");
             exit(EXIT_FAILURE);
         }
     }
@@ -44,7 +44,7 @@ int main()
 
     if(process_id<0)
     {
-        perror("Error occured during fork()!\n");
+        Perror("Error occured during fork()!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -65,15 +65,15 @@ int main()
         // Open the fifo file
         if ((fifo_fd = open(fifo_file, O_RDONLY)) == -1) 
         {
-            perror("Error occured during accessing TypeSpace.\nTerminate the TypeSpace program and run it again!\n");
+            Perror("Error occured during accessing TypeSpace.\nTerminate the TypeSpace program and run it again!\n");
             exit(EXIT_FAILURE);
         }
-        printf("Connected to the TypeSpace!\n");
+        printf("Connected to the TypeSpace!\n\n");
 
         // Create a socket to listen for clients
         if((server_socket = createTcpIp4Socket()) == -1)
         {
-            perror("Error occured while creating the socket!\nTry again later!\n");
+            Perror("Error occured while creating the socket!\nTry again later!\n");
             exit(EXIT_FAILURE);
         }
 
@@ -84,7 +84,7 @@ int main()
         server_address = setAddress("", PORT);
         if(bind(server_socket, (struct sockaddr*)server_address, sizeof(*server_address)) == -1)
         {
-            perror("Error occured while binding the port!\nTry again later!\n");
+            Perror("Error occured while binding the port!\nTry again later!\n");
             exit(EXIT_FAILURE);
         }
 
@@ -125,7 +125,7 @@ int main()
 
             if((ready_select < 0) && (errno!=EINTR))
             {
-                perror("Error occoured during checking for ready fds to read!\n");
+                Perror("Error occoured during checking for ready fds to read!\n");
                 exit(EXIT_FAILURE);
             }
 
@@ -183,7 +183,7 @@ int main()
                 temp = temp->next;
             }while(temp != head_node);
         
-
+        sleep(1);
         }
         // Remove all nodes including server node
         clean_up(head_node);
