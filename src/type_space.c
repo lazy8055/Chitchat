@@ -1,27 +1,25 @@
 #include "../utility/helper.h"
+#include <signal.h>
 
-void print_help(char role[])
+int fifo_fd;
+char fifo_file[BUFFER];
+
+void dispose(int signal)
 {
-    if(strcmp(role, "client") == 0)
-    {
-        printf("      help - To display the help menu\n");
-        printf("      exit - To exit from the chatroom\n");
-    }
-    else if(strcmp(role, "server") == 0)
-    {
-        printf("      remove user_name - To remove a particular user from the chatroom\n");
-        printf("      remove all       - To remove all users from the chatroom\n");
-        printf("      help             - To display the help menu\n");
-        printf("      exit             - To close the chatroom\n");
-    }
+    //close the fifo file descriptor and delete the file
+    char remove_command[COMMAND_LEN] = "rm ";
+    strcat(remove_command, fifo_file);
+    system(remove_command);
+    close(fifo_fd);
 }
 
 int main(int argc, char const *argv[])
 {
-    int fifo_fd;
-    char send_buffer[BUFFER], fifo_file[BUFFER], role[BUFFER] ;
+    char send_buffer[BUFFER], role[BUFFER] ;
     strcpy(fifo_file, argv[2]);
     strcpy(role, argv[1]);
+
+    signal(SIGPIPE, dispose);
 
     // Open fifo file created by server/client program to write only
     fifo_fd = open(fifo_file, O_WRONLY );
@@ -48,9 +46,7 @@ int main(int argc, char const *argv[])
         write(fifo_fd, send_buffer, BUFFER);
     }
 
-    //close the fifo file descriptor and delete the file
-    close(fifo_fd);
-    remove(fifo_file);
+    dispose(0);
     
     return 0;
 }

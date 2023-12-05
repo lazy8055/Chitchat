@@ -23,8 +23,11 @@ $(OBJ_DIR)/server.o: src/server.c utility/helper.h utility/server_helper.h | $(O
 server: $(OBJ_DIR)/server.o $(OBJ_DIR)/helper.o $(OBJ_DIR)/server_helper.o
 	$(CC) -D_GNU_SOURCE $^ -o $@
 
-type_space: src/type_space.c utility/helper.h | $(OBJ_DIR)
-	$(CC) $< $(CFLAGS) -o $@
+$(OBJ_DIR)/type_space.o: src/type_space.c utility/helper.h | $(OBJ_DIR)
+	$(CC) -c $< -o $@
+
+type_space: $(OBJ_DIR)/type_space.o $(OBJ_DIR)/helper.o
+	$(CC) $^ -o $@
 
 chitchat: src/chitchat.c
 	$(CC) src/chitchat.c -o $@

@@ -61,14 +61,20 @@ void send_to_all(sockfd_node *server_node, sockfd_node *sender, char message[])
 void accept_client(sockfd_node *server_node)
 {
     int client_socket;
-    char user_name[BUFFER], send_buffer[BUFFER], intro_massage[] = " joined the Chatroom!";;
+    char user_name[BUFFER] = "test", send_buffer[BUFFER], intro_massage[] = " joined the Chatroom!";;
     struct sockaddr_in client_address;
-    socklen_t client_address_len;
-
+    socklen_t client_address_len = sizeof(client_address);
+    printf("Server: %d\n", server_node->socket_val);
     client_socket = accept(server_node->socket_val, (struct sockaddr*)&client_address, &client_address_len);
-    
+    if(client_socket < 0)
+    {
+        Perror("Error Occured During accepting the new client!\n");
+        return;
+    }
+    printf("User:%s\n",user_name);
     // Get username
     recv(client_socket, user_name, BUFFER, 0);
+    printf("%d User:%s\n",client_socket, user_name);
 
     server_node = insert_client(server_node, client_socket,user_name, client_address);
 
@@ -166,6 +172,8 @@ sockfd_node* remove_all_nodes(sockfd_node* server_node)
     }
     server_node->pre = server_node; 
     server_node->next = server_node;
+
+    printf("%s%s%s%s\n", ANSI_BOLD, ANSI_RED, "Removed all users!", ANSI_RESET);
 }
 
 // Remove all client nodes and server node

@@ -43,6 +43,22 @@ void display_banner()
     printf("\n\n");
 }
 
+void print_help(char role[])
+{
+    if(strcmp(role, "client") == 0)
+    {
+        printf("      help - To display the help menu\n");
+        printf("      exit - To exit from the chatroom\n");
+    }
+    else if(strcmp(role, "server") == 0)
+    {
+        printf("      remove user_name - To remove a particular user from the chatroom\n");
+        printf("      remove all       - To remove all users from the chatroom\n");
+        printf("      help             - To display the help menu\n");
+        printf("      exit             - To close the chatroom\n");
+    }
+}
+
 void Perror(char error_message[])
 {
     printf("%s%s",ANSI_BOLD, ANSI_RED);
