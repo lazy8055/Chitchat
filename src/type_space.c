@@ -33,7 +33,7 @@ int main(int argc, char const *argv[])
     // Get message from user and write to fifo file
     while(strcmp(send_buffer, "exit") != 0)
     {
-        printf("Type here >>> ");
+        printf("%s%sType here >>> %s", ANSI_BOLD, ANSI_GREEN, ANSI_RESET);
         fgets(send_buffer, BUFFER, stdin);
         send_buffer[strcspn(send_buffer, "\n")] = '\0';
 
