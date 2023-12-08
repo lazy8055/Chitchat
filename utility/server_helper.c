@@ -61,20 +61,33 @@ void send_to_all(sockfd_node *server_node, sockfd_node *sender, char message[])
 void accept_client(sockfd_node *server_node)
 {
     int client_socket;
-    char user_name[BUFFER] = "test", send_buffer[BUFFER], intro_massage[] = " joined the Chatroom!";;
+    char user_name[BUFFER], send_buffer[BUFFER], intro_massage[] = " joined the Chatroom!";;
     struct sockaddr_in client_address;
     socklen_t client_address_len = sizeof(client_address);
-    printf("Server: %d\n", server_node->socket_val);
+    //printf("Server: %d\n", server_node->socket_val);
     client_socket = accept(server_node->socket_val, (struct sockaddr*)&client_address, &client_address_len);
     if(client_socket < 0)
     {
         Perror("Error Occured During accepting the new client!\n");
         return;
     }
-    printf("User:%s\n",user_name);
+    //printf("User:%s\n",user_name);
     // Get username
-    recv(client_socket, user_name, BUFFER, 0);
-    printf("%d User:%s\n",client_socket, user_name);
+    while(1)
+    {
+        recv(client_socket, user_name, BUFFER, 0);
+        if(is_username_already_used(server_node, user_name))
+        {
+            send(client_socket, "0", 2, 0);
+        }
+        else
+        {
+            send(client_socket, "1", 2, 0);
+            break;
+        }
+    }
+    
+    //printf("%d User:%s\n",client_socket, user_name);
 
     server_node = insert_client(server_node, client_socket,user_name, client_address);
 
@@ -87,6 +100,18 @@ void accept_client(sockfd_node *server_node)
     // Send intro message to every clients
     send_to_all(server_node, server_node, send_buffer);
     
+}
+
+int is_username_already_used(sockfd_node* server_node, char username[])
+{
+    sockfd_node* temp = server_node->next;
+
+    while(temp != server_node)
+    {
+        if(strcmp(temp->user_name, username) == 0) return 1;
+        temp = temp->next;
+    }
+    return 0;
 }
 
 // Remove client node using socket value

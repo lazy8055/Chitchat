@@ -21,6 +21,7 @@ sockfd_node* initialize(int server_socket, struct sockaddr_in server_address);
 sockfd_node* insert_client(sockfd_node* server_node, int client_socket,char* user_name, struct sockaddr_in client_address);
 void send_to_all(sockfd_node *server_node, sockfd_node *sender, char message[]);
 void accept_client(sockfd_node *server_node);
+int is_username_already_used(sockfd_node *server_node, char username[]);
 sockfd_node* remove_client_by_soc(sockfd_node* server_node, int socket_val);
 sockfd_node* remove_client_by_name(sockfd_node* server_node, char *user_name);
 sockfd_node* remove_all_nodes(sockfd_node* server_node);

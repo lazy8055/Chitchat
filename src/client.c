@@ -1,4 +1,7 @@
 #include "../utility/helper.h"
+#include <ctype.h>
+
+int validate_username(char username[]);
 
 int main()
 {
@@ -86,10 +89,27 @@ int main()
         }
     
         // Get username and send to server
-        printf("Enter the username: ");
-        fflush(stdout);
-        read(fifo_fd, send_buffer, BUFFER);
-        send(client_socket,send_buffer, BUFFER,0);
+        do
+        {
+            do
+            {
+                printf("Enter the username: ");
+                fflush(stdout);
+                read(fifo_fd, send_buffer, BUFFER);
+            }while(validate_username(send_buffer));
+            send(client_socket,send_buffer, BUFFER,0);
+            recv(client_socket,recv_buffer, 2, 0);
+            if(strcmp(recv_buffer, "0") == 0)
+            {
+                printf("%s%sUsername already taken!\n%s", ANSI_BOLD, ANSI_RED, ANSI_RESET);
+            }
+            else break;
+        }while(1);
+        
+        
+
+
+        
         printf("%s%s%s%s\n\n",ANSI_BOLD ,ANSI_GREEN, send_buffer, ANSI_RESET);
         fflush(stdout);
     
@@ -146,5 +166,20 @@ int main()
     }
     return 0;
 
+}
+
+// To validate the username if it only contains alphabets and numbers
+int validate_username(char username[])
+{
+    int len = strlen(username);
+    for(int i=0; i<len; i++)
+    {
+        if(!isalnum(username[i]))
+        {
+            printf("%s%s%s\nInvalid Username!\n%s", ANSI_BOLD, ANSI_RED,username, ANSI_RESET);
+            return 1;
+        }
+    }
+    return 0;
 }
 
